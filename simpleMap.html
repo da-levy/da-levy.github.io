@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang= "en">
+<head>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+	<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+	
+	<script src="https://unpkg.com/esri-leaflet@3.0.10/dist/esri-leaflet.js"></script>
+
+	<script src = "StraboSAJ.js"></script>
+	<script src = "StraboDAL.js"></script>
+	<style>
+		#map {position: absolute; top:0; bottom:0; left:0; right:0}
+		/* Popup container */
+		.leaflet-popup-content {
+			max-height: 200px;   /* limit vertical size of popup */
+			overflow-y: auto;    /* add vertical scrollbar if content is too tall */
+		}
+
+		/* Popup images */
+		.popup-img {
+			max-width: 100%;   /* shrink to fit popup width */
+			height: auto;      
+			max-height: 300px; /* thumbnail size */
+			margin: 5px 0;
+			display: block;
+		}
+
+		.label-text {
+		  background: none;         /* remove default tooltip background */
+		  border: none;             /* remove border */
+		  color: black;             /* text color */
+		  font-weight: bold;
+		  text-shadow:
+		    -1px -1px 0 #fff,
+		     1px -1px 0 #fff,
+		    -1px  1px 0 #fff,
+		     1px  1px 0 #fff;      /* white halo around text */
+		  font-size: 12px;
+		  padding: 0;
+		  pointer-events: none;     /* so clicks go to marker */
+		}		
+	</style>
+	<meta charset= "UTF-8">
+	<meta http-equiv="X-UA-Compatible" content = "IE=edge">
+	<meta name="viewport" content="width-device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<div id = "map"></div>
+	<script>
+		var map = L.map('map', {maxZoom: 26}).setView([43.063373, -70.697729],15);
+		var esriWorldImagery = L.tileLayer(
+		  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+		    attribution: 'Tiles © Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+		    maxZoom: 20
+		}).addTo(map);
+
+		var maineOrtho2018 = L.esri.imageMapLayer({
+		  url: "https://gis.maine.gov/arcgis/rest/services/imageryBaseMapsEarthCover/orthoRegional2018/ImageServer",
+		  attribution: "Maine GIS Ortho 2018",
+		  minZoom: 21
+		}).addTo(map);
+
+		map.on("zoomend", function() {
+		  if (map.getZoom() > 20) {
+		    if (map.hasLayer(esriWorldImagery)) {
+		      map.removeLayer(esriWorldImagery);
+		    }
+		    if (!map.hasLayer(maineOrtho2018)) {
+		      map.addLayer(maineOrtho2018);
+		    }
+		  } else {
+		    if (map.hasLayer(maineOrtho2018)) {
+		      map.removeLayer(maineOrtho2018);
+		    }
+		    if (!map.hasLayer(esriWorldImagery)) {
+		      map.addLayer(esriWorldImagery);
+		    }
+		  }
+		});
+
+		var StraboSAJ = L.geoJSON(StraboSAJ, {
+			pointToLayer: function(feature, latlng) {
+			  return L.circleMarker(latlng, {
+			    radius: 6,           // marker size
+			    fillColor: "blue",// fill color
+			    color: "#000",       // border color
+			    weight: 1,           // border thickness
+			    opacity: 1,          // border opacity
+			    fillOpacity: 0.8     // fill opacity
+			  });
+			},
+			
+			onEachFeature: function (feature, layer) {
+				if (feature.properties.name) {
+					layer.bindTooltip(feature.properties.name, { permanent: true,
+						direction: "right", 
+						offset: [10, 0],
+						className: 'label-text' 
+					});
+				}
+				var popupContent = "<b>Properties:</b><br>";
+				var propertiesToShow = ["name","date","notes"];
+
+				propertiesToShow.forEach(function(key){
+					if (feature.properties[key] !== undefined){
+						popupContent += "<b>" + key + "</b>:" + feature.properties[key] + "<br>";
+					}
+				})
+
+
+				// for (var key in feature.properties) {
+				// 	// skip images here, handle separately
+				// 	if (key !== "images") {
+				// 		popupContent += "<b>" + key +"</b>"+ ": " + feature.properties[key] + "<br>";
+				// 	}
+				// }
+
+				// If there is an images field, loop through and display them
+				if (feature.properties.images) {
+					popupContent += "<b>Images:</b><br>";
+					feature.properties.images.forEach(function(img) {
+						var url = img.url || img.self || img;
+						var title = img.title || img.caption || "";  // adjust to match your data
+						if (title) {
+							popupContent += "<div><b>" + title + "</b></div>";
+						}
+						popupContent += '<img src="' + url + '" class="popup-img"><br>';
+					});
+				}
+				layer.bindPopup(popupContent, { maxWidth: 250 });
+			}
+		}).addTo(map);
+		var StraboDAL = L.geoJSON(StraboDAL, {
+			pointToLayer: function(feature, latlng) {
+			  return L.circleMarker(latlng, {
+			    radius: 6,           // marker size
+			    fillColor: "#ff7800",// fill color
+			    color: "#000",       // border color
+			    weight: 1,           // border thickness
+			    opacity: 1,          // border opacity
+			    fillOpacity: 0.8     // fill opacity
+			  });
+			},
+			onEachFeature: function (feature, layer) {
+				if (feature.properties.name) {
+					layer.bindTooltip(feature.properties.name, { permanent: true,
+						direction: "right", 
+						offset: [10, 0],
+						className: 'label-text' 
+					});
+				}				
+				var popupContent = "<b>Properties:</b><br>";
+				var propertiesToShow = ["name","date","notes"];
+
+				propertiesToShow.forEach(function(key){
+					if (feature.properties[key] !== undefined){
+						popupContent += "<b>" + key + "</b>:" + feature.properties[key] + "<br>";
+					}
+				})				
+
+				// for (var key in feature.properties) {
+				// 	// skip images here, handle separately
+				// 	if (key !== "images") {
+				// 		popupContent += "<b>" + key +"</b>"+ ": " + feature.properties[key] + "<br>";
+				// 	}
+				// }
+
+				// If there is an images field, loop through and display them
+				if (feature.properties.images) {
+					popupContent += "<b>Images:</b><br>";
+					feature.properties.images.forEach(function(img) {
+						var url = img.url || img.self || img;
+						var title = "";
+						if(img.title && !img.title.includes("Untitled")){
+							title = img.title;
+						} else if (img.caption){
+							title = img.caption;
+						}
+						if (title) {
+							popupContent += "<div><b>" + title + "</b></div>";
+						}
+						popupContent += '<img src="' + url + '" class="popup-img"><br>';
+					});
+				}
+				layer.bindPopup(popupContent, { maxWidth: 250 });
+			}
+		}).addTo(map);
+	</script>
+</body>
