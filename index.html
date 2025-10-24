@@ -1,1 +1,148 @@
 <hl>Drew A. Levy</hl>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Name - Personal Website</title>
+  <style>
+    /* --- Global Styles --- */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background-color: #1e1e2f;
+      color: white;
+      padding: 1em 0;
+      text-align: center;
+    }
+
+    nav {
+      background-color: #2e2e48;
+      display: flex;
+      justify-content: center;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      padding: 1em 2em;
+      transition: background 0.3s;
+    }
+
+    nav a:hover,
+    nav a.active {
+      background-color: #57578a;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2em auto;
+      padding: 0 1em;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    section {
+      display: none;
+      padding: 2em;
+    }
+
+    section.active {
+      display: block;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1em;
+      background: #1e1e2f;
+      color: white;
+      position: fixed;
+      width: 100%;
+      bottom: 0;
+    }
+
+    @media (max-width: 600px) {
+      nav {
+        flex-direction: column;
+      }
+      nav a {
+        padding: 0.8em;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Your Name</h1>
+    <p>Welcome to my personal website!</p>
+  </header>
+
+  <nav>
+    <a href="#home" class="active" onclick="showPage('home')">Home</a>
+    <a href="#about" onclick="showPage('about')">About</a>
+    <a href="#portfolio" onclick="showPage('portfolio')">Portfolio</a>
+    <a href="#contact" onclick="showPage('contact')">Contact</a>
+  </nav>
+
+  <main>
+    <section id="home" class="active">
+      <h2>Home</h2>
+      <p>Welcome to my website! Here you can learn more about me, my projects, and how to get in touch.</p>
+    </section>
+
+    <section id="about">
+      <h2>About Me</h2>
+      <p>Hi, I’m [Your Name]! I’m passionate about [your interests, e.g., web development, design, or writing].</p>
+    </section>
+
+    <section id="portfolio">
+      <h2>Portfolio</h2>
+      <p>Here are some of my favorite projects:</p>
+      <ul>
+        <li>Project 1 – description</li>
+        <li>Project 2 – description</li>
+        <li>Project 3 – description</li>
+      </ul>
+    </section>
+
+    <section id="contact">
+      <h2>Contact</h2>
+      <p>You can reach me at: <a href="mailto:you@example.com">you@example.com</a></p>
+      <form>
+        <label>Name:</label><br>
+        <input type="text" name="name" required><br><br>
+        <label>Email:</label><br>
+        <input type="email" name="email" required><br><br>
+        <label>Message:</label><br>
+        <textarea name="message" rows="5" required></textarea><br><br>
+        <button type="submit">Send</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    &copy; 2025 Your Name. All rights reserved.
+  </footer>
+
+  <script>
+    function showPage(pageId) {
+      // Hide all sections
+      document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+      // Remove active class from nav
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      // Show the selected section
+      document.getElementById(pageId).classList.add('active');
+      // Highlight nav link
+      document.querySelector(`nav a[href="#${pageId}"]`).classList.add('active');
+    }
+  </script>
+</body>
+</html>
